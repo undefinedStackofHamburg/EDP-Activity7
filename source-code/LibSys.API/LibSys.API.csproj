@@ -1,0 +1,55 @@
+<!--
+  LibSys.API.csproj
+  ─────────────────
+  This is the project definition file for the C# backend.
+  It tells .NET what kind of project this is and which
+  external packages (NuGet) to download and use.
+
+  PACKAGES EXPLAINED:
+  ┌─────────────────────────────────────────────────────────┐
+  │ MySql.Data         → Official MySQL connector by Oracle │
+  │                      Lets C# talk to your XAMPP MySQL   │
+  │                                                         │
+  │ Dapper             → Micro ORM (Object-Relational Map)  │
+  │                      Turns SQL query results directly   │
+  │                      into C# objects — much simpler     │
+  │                      than writing manual mapping code   │
+  │                                                         │
+  │ ClosedXML          → Excel file generator               │
+  │                      Creates .xlsx files from C# code   │
+  │                      with full formatting support       │
+  └─────────────────────────────────────────────────────────┘
+
+  HOW TO RESTORE PACKAGES:
+  Open a terminal in this folder and run:
+    dotnet restore
+  That downloads all packages automatically.
+-->
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <!-- Target .NET 8 — latest LTS version -->
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- App name shown in logs and Swagger -->
+    <RootNamespace>LibSys.API</RootNamespace>
+    <AssemblyName>LibSys.API</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- MySQL Connector/NET — connects C# to MySQL -->
+    <PackageReference Include="MySql.Data" Version="8.3.0" />
+
+    <!-- Dapper — simple SQL-to-object mapper -->
+    <PackageReference Include="Dapper" Version="2.1.28" />
+
+    <!-- ClosedXML — Excel report generation -->
+    <PackageReference Include="ClosedXML" Version="0.102.2" />
+
+    <!-- Swagger UI — lets you test your API in the browser -->
+    <!-- Visit http://localhost:5000/swagger when running    -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+</Project>
