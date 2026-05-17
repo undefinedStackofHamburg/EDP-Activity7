@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LibSys — Dashboard</title>
+  <link rel="icon" href="LibSysLogo-mini.png">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="app-shell" class="app-shell">
+  <div class="main-area">
+    <div class="page-content">
+
+      <section class="page-section active db-section">
+
+        <div class="db-top anim">
+          <div class="db-hero">
+            <div class="db-hero-label">Library at a Glance</div>
+            <div class="db-hero-number" id="stat-books">—</div>
+            <div class="db-hero-sub">total books in catalog</div>
+            <div class="db-ring-wrap">
+              <svg class="db-ring" viewBox="0 0 120 120">
+                <circle class="db-ring-bg" cx="60" cy="60" r="50"/>
+                <circle class="db-ring-fill db-ring-orange" cx="60" cy="60" r="50" id="ring-avail"/>
+                <circle class="db-ring-fill db-ring-blue"   cx="60" cy="60" r="50" id="ring-loan"/>
+              </svg>
+              <div class="db-ring-center">
+                <div class="db-ring-pct" id="ring-pct-label">—%</div>
+                <div class="db-ring-pct-sub">available</div>
+              </div>
+            </div>
+            <div class="db-ring-legend">
+              <span class="db-legend-dot" style="background:var(--accent)"></span><span>Available</span>
+              <span class="db-legend-dot" style="background:#4A7DC0;margin-left:12px"></span><span>On Loan</span>
+            </div>
+            <button class="btn btn-primary db-hero-cta" onclick="window.location.href='loans.html'">+ New Loan</button>
+          </div>
+
+          <div class="db-side-stack">
+            <div class="db-metric anim anim-d1">
+              <div class="db-metric-top">
+                <div class="db-metric-icon" style="color:#4A8C3A">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="db-metric-badge badge-green">Registered</div>
+              </div>
+              <div class="db-metric-value" id="stat-members">—</div>
+              <div class="db-metric-label">Members</div>
+              <div class="db-metric-bar" style="--bar-color:#4A8C3A;--bar-w:72%"></div>
+            </div>
+            <div class="db-metric anim anim-d2">
+              <div class="db-metric-top">
+                <div class="db-metric-icon" style="color:#4A7DC0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+                </div>
+                <div class="db-metric-badge badge-green">Active</div>
+              </div>
+              <div class="db-metric-value" id="stat-active-loans">—</div>
+              <div class="db-metric-label">Active Loans</div>
+              <div class="db-metric-bar" style="--bar-color:#4A7DC0;--bar-w:55%"></div>
+            </div>
+            <div class="db-metric db-metric-alert anim anim-d3">
+              <div class="db-metric-top">
+                <div class="db-metric-icon" style="color:var(--red)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div class="db-metric-badge badge-red">Attention</div>
+              </div>
+              <div class="db-metric-value" id="stat-overdue">—</div>
+              <div class="db-metric-label">Overdue Loans</div>
+              <div class="db-metric-bar" style="--bar-color:var(--red);--bar-w:20%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="db-bottom anim anim-d2">
+          <div class="db-feed card">
+            <div class="db-feed-header">
+              <span class="db-feed-title">Recent Activity</span>
+              <a class="btn btn-sm btn-secondary" href="loans.html">All loans →</a>
+            </div>
+            <div id="db-activity-list" class="db-activity-list"></div>
+          </div>
+          <div class="db-right-col">
+            <div class="db-fines-card card">
+              <div class="db-fines-label">Total Fines Collected</div>
+              <div class="db-fines-value" id="stat-fines">—</div>
+              <div class="db-fines-sub">from <span id="stat-available-inline">—</span> available books</div>
+            </div>
+            <div class="card db-quick">
+              <div class="db-quick-title">Quick Actions</div>
+              <div class="db-quick-grid">
+                <a class="db-qa-btn" href="loans.html">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+                  Add Loan
+                </a>
+                <a class="db-qa-btn" href="books.html">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                  Add Book
+                </a>
+                <a class="db-qa-btn" href="members.html">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  Register
+                </a>
+                <a class="db-qa-btn" href="authors.html">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  Author
+                </a>
+                <a class="db-qa-btn" href="categories.html">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  Category
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+<script src="app.js"></script>
+<script src="sidebar.js"></script>
+<script src="shell.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', renderDashboard);
+</script>
+</body>
+</html>

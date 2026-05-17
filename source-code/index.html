@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LibSys — Sign In</title>
+  <link rel="icon" href="LibSysLogo-mini.png">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════
+     LOGIN PAGE
+════════════════════════════════════════════════════ -->
+<div class="login-page">
+  <div class="login-card anim">
+    <div class="login-logo">
+      <div class="logo-mark">
+        <img src="LibSysLogox64.png" alt="LibSys Logo"/>
+      </div>
+      <h1>Lib<span style="color:var(--accent2)">Sys</span></h1>
+      <p>Library Management System</p>
+    </div>
+
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">Username or Email</label>
+        <input class="form-input" id="login-user" type="text" placeholder="e.g. admin or admin@libsys.local"/>
+        <div id="login-user-error"
+             style="display:none;color:var(--red);font-size:0.75rem;margin-top:5px;
+                    align-items:center;gap:4px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span id="login-user-error-text"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div style="position:relative">
+          <input class="form-input" id="login-pass" type="password" placeholder="••••••••" style="padding-right:38px"/>
+          <button type="button" id="toggle-pass" onclick="togglePassVis()"
+                  style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                         background:none;border:none;cursor:pointer;padding:0;
+                         color:var(--muted);display:flex;align-items:center" title="Show/hide password">
+            <svg id="eye-icon-show" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg id="eye-icon-hide" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" style="display:none">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+        <div id="login-pass-error"
+             style="display:none;color:var(--red);font-size:0.75rem;margin-top:5px;
+                    align-items:center;gap:4px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span id="login-pass-error-text"></span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--ghost);cursor:pointer">
+          <input type="checkbox" checked style="accent-color:var(--accent)"/> Remember me
+        </label>
+        <a href="#" onclick="openForgotPassword()" style="color:var(--accent2);font-size:0.78rem;text-decoration:none">Forgot password?</a>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px" onclick="doLogin()" id="login-btn">
+        Sign In
+      </button>
+      <div id="login-error-wrap"></div>
+    </div>
+    <p style="text-align:center;margin-top:16px;font-size:0.72rem;color:var(--muted)">EDP Activity - LibraryMS v1.0</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     FORGOT PASSWORD MODAL (3-step flow)
+════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-forgot">
+  <div class="modal fp-modal">
+
+    <!-- Step indicators -->
+    <div class="fp-steps">
+      <div class="fp-step active" id="fp-step-dot-1">
+        <div class="fp-step-circle">1</div>
+        <div class="fp-step-label">Identify</div>
+      </div>
+      <div class="fp-step-line"></div>
+      <div class="fp-step" id="fp-step-dot-2">
+        <div class="fp-step-circle">2</div>
+        <div class="fp-step-label">Verify</div>
+      </div>
+      <div class="fp-step-line"></div>
+      <div class="fp-step" id="fp-step-dot-3">
+        <div class="fp-step-circle">3</div>
+        <div class="fp-step-label">Reset</div>
+      </div>
+    </div>
+
+    <!-- ── STEP 1: Enter username or email ── -->
+    <div id="fp-pane-1" class="fp-pane active">
+      <div class="modal-header">
+        <div class="modal-title">Forgot Password</div>
+        <button class="modal-close" onclick="closeForgotPassword()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.82rem;color:var(--ghost);margin-bottom:18px">Enter your username or email address and we'll verify your identity.</p>
+        <div class="form-group">
+          <label class="form-label">Username or Email <span style="color:var(--accent)">*</span></label>
+          <input class="form-input" id="fp-username" type="text" placeholder="e.g. admin or admin@libsys.local"/>
+        </div>
+        <div id="fp-err-1" class="fp-error" style="display:none"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeForgotPassword()">Cancel</button>
+        <button class="btn btn-primary" id="fp-btn-1" onclick="fpStep1Next()">Continue</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: Verify identity via current password ── -->
+    <div id="fp-pane-2" class="fp-pane">
+      <div class="modal-header">
+        <div class="modal-title">Verify Identity</div>
+        <button class="modal-close" onclick="closeForgotPassword()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="fp-user-chip" id="fp-user-chip"></div>
+        <p style="font-size:0.82rem;color:var(--ghost);margin-bottom:14px">Enter your current password to confirm it's you.</p>
+        <div class="form-group">
+          <label class="form-label">Current Password <span style="color:var(--accent)">*</span></label>
+          <div style="position:relative">
+            <input class="form-input" id="fp-answer" type="password" placeholder="Your current password" style="padding-right:38px"/>
+            <button type="button" onclick="toggleEye('fp-answer','fp-eye-cur-show','fp-eye-cur-hide')"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                           background:none;border:none;cursor:pointer;padding:0;
+                           color:var(--muted);display:flex;align-items:center" title="Show/hide password">
+              <svg id="fp-eye-cur-show" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg id="fp-eye-cur-hide" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="fp-err-2" class="fp-error" style="display:none"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeForgotPassword()">Back</button>
+        <button class="btn btn-primary" id="fp-btn-2" onclick="fpStep2Next()">Verify</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 3: Set new password ── -->
+    <div id="fp-pane-3" class="fp-pane">
+      <div class="modal-header">
+        <div class="modal-title">Set New Password</div>
+        <button class="modal-close" onclick="closeForgotPassword()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="fp-success-banner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Identity verified successfully
+        </div>
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label">New Password <span style="color:var(--accent)">*</span></label>
+          <div style="position:relative">
+            <input class="form-input" id="fp-new-pass" type="password" placeholder="Enter new password" style="padding-right:38px"/>
+            <button type="button" onclick="toggleEye('fp-new-pass','fp-eye-new-show','fp-eye-new-hide')"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                           background:none;border:none;cursor:pointer;padding:0;
+                           color:var(--muted);display:flex;align-items:center" title="Show/hide password">
+              <svg id="fp-eye-new-show" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg id="fp-eye-new-hide" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password <span style="color:var(--accent)">*</span></label>
+          <div style="position:relative">
+            <input class="form-input" id="fp-confirm-pass" type="password" placeholder="Repeat new password" style="padding-right:38px"/>
+            <button type="button" onclick="toggleEye('fp-confirm-pass','fp-eye-conf-show','fp-eye-conf-hide')"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                           background:none;border:none;cursor:pointer;padding:0;
+                           color:var(--muted);display:flex;align-items:center" title="Show/hide password">
+              <svg id="fp-eye-conf-show" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg id="fp-eye-conf-hide" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="fp-strength-wrap">
+          <div class="fp-strength-bar" id="fp-strength-bar"></div>
+        </div>
+        <div class="form-note" id="fp-strength-label" style="margin-top:4px"></div>
+        <div id="fp-err-3" class="fp-error" style="display:none"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="fpGoBack(2)">Back</button>
+        <button class="btn btn-primary" onclick="fpStep3Save()">Save Password</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 4: Done ── -->
+    <div id="fp-pane-done" class="fp-pane">
+      <div class="modal-body" style="padding:40px 28px;text-align:center">
+        <div class="fp-done-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:800;color:var(--snow);margin-bottom:8px">Password Reset!</div>
+        <p style="font-size:0.82rem;color:var(--ghost);margin-bottom:24px">Your password has been changed. You can now sign in with your new credentials.</p>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="closeForgotPassword()">Back to Sign In</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:5000/api';
+
+// ── EYE TOGGLE (shared helper) ──────────────────────────────────────────────
+function toggleEye(inputId, showIconId, hideIconId) {
+  const input    = document.getElementById(inputId);
+  const showIcon = document.getElementById(showIconId);
+  const hideIcon = document.getElementById(hideIconId);
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  showIcon.style.display = isHidden ? 'none' : '';
+  hideIcon.style.display = isHidden ? ''     : 'none';
+}
+function togglePassVis() {
+  toggleEye('login-pass', 'eye-icon-show', 'eye-icon-hide');
+}
+
+// ── LOGIN — calls the real C# API ──────────────────────────────────────────
+// ── TOAST (login page has no shell.js, so inline version) ──────────────────
+function loginToast(msg, type = 'error') {
+  const svgIcons = {
+    success: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+    error:   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    warn:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    info:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+  };
+  let tc = document.getElementById('toast-container');
+  if (!tc) {
+    tc = document.createElement('div');
+    tc.className = 'toast-container';
+    tc.id = 'toast-container';
+    document.body.appendChild(tc);
+  }
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `<span style="display:flex;align-items:center">${svgIcons[type] || svgIcons.info}</span><span>${msg}</span>`;
+  tc.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+async function doLogin() {
+  const emailVal = document.getElementById('login-user').value.trim();
+  const p        = document.getElementById('login-pass').value;
+  const btn      = document.getElementById('login-btn');
+
+  clearFieldErrors();
+
+  let hasError = false;
+  if (!emailVal) { showUserError('Email is required.'); hasError = true; }
+  if (!p)        { showPassError('Password is required.'); hasError = true; }
+  if (hasError) return;
+
+  btn.textContent = 'Signing in…';
+  btn.disabled = true;
+
+  try {
+    const res  = await fetch(`${API}/users/login`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ username: emailVal, password: p })
+    });
+    const json = await res.json();
+
+    if (!res.ok || !json.success) {
+      const msg = json.message || 'Invalid credentials.';
+      // "password" in message → show under password field
+      // "username" or "account" in message → show under email field
+      // anything else (server/API error) → toast
+      const lmsg = msg.toLowerCase();
+      if (lmsg.includes('password')) {
+        showPassError(msg);
+      } else if (lmsg.includes('username') || lmsg.includes('account') || lmsg.includes('deactivated') || lmsg.includes('invalid')) {
+        showUserError(msg);
+      } else {
+        loginToast(msg, 'error');
+      }
+      return;
+    }
+
+    sessionStorage.setItem('libsys_auth', '1');
+    sessionStorage.setItem('libsys_user', JSON.stringify(json.data));
+    window.location.href = 'dashboard.html';
+
+  } catch (err) {
+    loginToast('Cannot reach the API server. Is dotnet run running?', 'error');
+  } finally {
+    btn.textContent = 'Sign In';
+    btn.disabled = false;
+  }
+}
+
+function showUserError(msg) {
+  const wrap = document.getElementById('login-user-error');
+  document.getElementById('login-user-error-text').textContent = msg;
+  wrap.style.display = 'flex';
+  document.getElementById('login-user').style.borderColor = 'var(--red)';
+}
+
+function showPassError(msg) {
+  const wrap = document.getElementById('login-pass-error');
+  document.getElementById('login-pass-error-text').textContent = msg;
+  wrap.style.display = 'flex';
+  document.getElementById('login-pass').style.borderColor = 'var(--red)';
+}
+
+function clearFieldErrors() {
+  const uw = document.getElementById('login-user-error');
+  uw.style.display = 'none';
+  document.getElementById('login-user-error-text').textContent = '';
+  document.getElementById('login-user').style.borderColor = '';
+
+  const pw = document.getElementById('login-pass-error');
+  pw.style.display = 'none';
+  document.getElementById('login-pass-error-text').textContent = '';
+  document.getElementById('login-pass').style.borderColor = '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('login-pass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+    clearFieldErrors();
+  });
+  document.getElementById('login-user').addEventListener('input', () => {
+    clearFieldErrors();
+  });
+  document.getElementById('modal-forgot').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-forgot')) closeForgotPassword();
+  });
+  document.getElementById('fp-new-pass').addEventListener('input', function() {
+    const { score, label } = fpPasswordStrength(this.value);
+    const colors = ['', '#C0392B', '#D97706', '#4A7DC0', '#4A8C3A', '#2E7D32'];
+    const widths = ['0%', '20%', '40%', '60%', '80%', '100%'];
+    const bar = document.getElementById('fp-strength-bar');
+    bar.style.width = widths[score];
+    bar.style.background = colors[score];
+    document.getElementById('fp-strength-label').textContent = label ? `Strength: ${label}` : '';
+    document.getElementById('fp-strength-label').style.color = colors[score];
+  });
+});
+
+// ── FORGOT PASSWORD — fully API-wired ─────────────────────────────────────
+// Step 1: Look up account by username OR email via GET /api/users
+// Step 2: Verify current password via POST /api/users/login
+// Step 3: Save new password via POST /api/users/{id}/password (NO hashing here
+//         — the C# controller hashes it; we send plain text over localhost)
+//
+// _fpUser holds the matched user object across the 3 steps.
+let _fpUser = null;
+
+function openForgotPassword() {
+  fpReset();
+  document.getElementById('modal-forgot').classList.add('open');
+}
+function closeForgotPassword() {
+  document.getElementById('modal-forgot').classList.remove('open');
+  setTimeout(fpReset, 300);
+}
+function fpReset() {
+  _fpUser = null;
+  document.getElementById('fp-username').value     = '';
+  document.getElementById('fp-answer').value       = '';
+  document.getElementById('fp-new-pass').value     = '';
+  document.getElementById('fp-confirm-pass').value = '';
+  fpShowPane(1);
+  document.getElementById('fp-strength-bar').style.width = '0';
+  document.getElementById('fp-strength-label').textContent = '';
+  // Re-enable all step buttons
+  ['fp-btn-1','fp-btn-2'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) { b.disabled = false; b.textContent = id === 'fp-btn-1' ? 'Continue' : 'Verify'; }
+  });
+}
+function fpShowPane(n) {
+  ['1','2','3','done'].forEach(k => {
+    document.getElementById(`fp-pane-${k}`).classList.toggle('active', String(k) === String(n));
+  });
+  [1,2,3].forEach(i => {
+    const dot = document.getElementById(`fp-step-dot-${i}`);
+    dot.classList.toggle('active', i <= n);
+    dot.classList.toggle('done',   i < n);
+  });
+  ['fp-err-1','fp-err-2','fp-err-3'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.display = 'none'; el.textContent = ''; }
+  });
+}
+function fpError(pane, msg) {
+  const el = document.getElementById(`fp-err-${pane}`);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function fpGoBack(to) { fpShowPane(to); }
+
+// ── STEP 1: Find account by username OR email ──────────────────────────────
+async function fpStep1Next() {
+  const identifier = document.getElementById('fp-username').value.trim();
+  if (!identifier) { fpError(1, 'Please enter your username or email.'); return; }
+
+  const btn = document.getElementById('fp-btn-1');
+  btn.disabled = true; btn.textContent = 'Looking up…';
+
+  try {
+    const res  = await fetch(`${API}/users`);
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      fpError(1, 'Cannot reach the server. Is the API running?');
+      btn.disabled = false; btn.textContent = 'Continue';
+      return;
+    }
+
+    const users = json.data || [];
+    // Match by username (case-insensitive, trimmed) OR email (case-insensitive)
+    const user = users.find(u =>
+      u.username?.trim().toLowerCase()  === identifier.toLowerCase() ||
+      u.email?.trim().toLowerCase()     === identifier.toLowerCase()
+    );
+
+    if (!user) {
+      fpError(1, 'No account found with that username or email.');
+      btn.disabled = false; btn.textContent = 'Continue';
+      return;
+    }
+    if (user.status === 'Inactive') {
+      fpError(1, 'This account is inactive. Contact an administrator.');
+      btn.disabled = false; btn.textContent = 'Continue';
+      return;
+    }
+
+    _fpUser = user;
+    document.getElementById('fp-user-chip').innerHTML =
+      `<span>Resetting for:</span> <strong>${user.fullName || user.username}</strong>`;
+    fpShowPane(2);
+
+  } catch {
+    fpError(1, 'Cannot reach the server. Is dotnet run running?');
+    btn.disabled = false; btn.textContent = 'Continue';
+  }
+}
+
+// ── STEP 2: Verify current password via POST /api/users/login ─────────────
+async function fpStep2Next() {
+  const currentPw = document.getElementById('fp-answer').value;
+  if (!currentPw) { fpError(2, 'Please enter your current password.'); return; }
+  if (!_fpUser)   { fpError(2, 'Session expired. Please start over.'); fpShowPane(1); return; }
+
+  const btn = document.getElementById('fp-btn-2');
+  btn.disabled = true; btn.textContent = 'Verifying…';
+
+  try {
+    // Use login endpoint to verify credentials — if it returns 200, password is correct
+    const res  = await fetch(`${API}/users/login`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ username: _fpUser.username, password: currentPw })
+    });
+    const json = await res.json();
+
+    if (!res.ok || !json.success) {
+      fpError(2, 'Current password is incorrect. Please try again.');
+      btn.disabled = false; btn.textContent = 'Verify';
+      return;
+    }
+
+    // Password verified — store it so step 3 can use it as currentPassword
+    _fpUser._verifiedPw = currentPw;
+    fpShowPane(3);
+
+  } catch {
+    fpError(2, 'Cannot reach the server. Is dotnet run running?');
+    btn.disabled = false; btn.textContent = 'Verify';
+  }
+}
+
+// ── STEP 3: Save new password via POST /api/users/{id}/password ───────────
+// We send the plain-text password — the C# controller hashes it with SHA-256.
+// NO hashing in JavaScript. This is intentional for this demo setup.
+async function fpStep3Save() {
+  const np = document.getElementById('fp-new-pass').value;
+  const cp = document.getElementById('fp-confirm-pass').value;
+
+  if (!np)          { fpError(3, 'Please enter a new password.'); return; }
+  if (np.length < 6){ fpError(3, 'Password must be at least 6 characters.'); return; }
+  if (np !== cp)    { fpError(3, 'Passwords do not match.'); return; }
+  if (!_fpUser)     { fpError(3, 'Session expired. Please start over.'); fpShowPane(1); return; }
+
+  const btn = document.querySelector('#fp-pane-3 .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  try {
+    const res = await fetch(`${API}/users/${_fpUser.id}/password`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        currentPassword: _fpUser._verifiedPw,  // verified in step 2
+        newPassword:     np                      // plain text — API hashes it
+      })
+    });
+    const json = await res.json();
+
+    if (!res.ok || !json.success) {
+      fpError(3, json.message || 'Failed to save password. Please try again.');
+      if (btn) { btn.disabled = false; btn.textContent = 'Save Password'; }
+      return;
+    }
+
+    // Success — go to done screen
+    fpShowPane('done');
+
+  } catch {
+    fpError(3, 'Cannot reach the server. Is dotnet run running?');
+    if (btn) { btn.disabled = false; btn.textContent = 'Save Password'; }
+  }
+}
+
+function fpPasswordStrength(pw) {
+  if (!pw) return { score: 0, label: '' };
+  let score = 0;
+  if (pw.length >= 6)  score++;
+  if (pw.length >= 10) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
+  return { score, label: labels[score] || '' };
+}
+</script>
+</body>
+</html>

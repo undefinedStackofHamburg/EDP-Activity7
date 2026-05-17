@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LibSys — Members</title>
+  <link rel="icon" href="LibSysLogo-mini.png">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="app-shell" class="app-shell">
+  <div class="main-area">
+    <div class="page-content">
+      <section class="page-section active">
+        <div class="page-header anim">
+          <div class="page-header-left">
+            <div class="page-title">Members</div>
+            <div class="page-subtitle" id="members-count">— members</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="search-bar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="member-search" placeholder="Search name or phone…"/>
+            </div>
+            <button class="btn btn-primary" onclick="addMember()">+ Register Member</button>
+          </div>
+        </div>
+        <div class="card anim">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Member</th><th>Membership Date</th><th>Status</th><th>Loans</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="members-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<!-- EDIT MEMBER -->
+<div class="modal-overlay" id="modal-edit-member">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Member</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-member')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-member-id"/>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input class="form-input" id="edit-member-fn" type="text"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input class="form-input" id="edit-member-ln" type="text"/>
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" id="edit-member-phone" type="text"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Membership Date</label>
+          <input class="form-input" id="edit-member-date" type="date"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="edit-member-status">
+          <option value="Active">Active</option>
+          <option value="Suspended">Suspended</option>
+          <option value="Expired">Expired</option>
+        </select>
+        <div class="form-note">Suspended/Expired members cannot borrow books.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-edit-member')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditMember()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MEMBER -->
+<div class="modal-overlay" id="modal-add-member">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Register Member</div>
+      <button class="modal-close" onclick="closeModal('modal-add-member')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">First Name <span style="color:var(--accent)">*</span></label>
+          <input class="form-input" id="add-member-fn" type="text" placeholder="Juan"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name <span style="color:var(--accent)">*</span></label>
+          <input class="form-input" id="add-member-ln" type="text" placeholder="Dela Cruz"/>
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input class="form-input" id="add-member-phone" type="text" placeholder="09XXXXXXXXX"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Membership Date</label>
+          <input class="form-input" id="add-member-date" type="date"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-member')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAddMember()">+ Register</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script src="sidebar.js"></script>
+<script src="shell.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('member-search').addEventListener('input', e => {
+    memberSearch = e.target.value; renderMembers();
+  });
+  renderMembers();
+});
+</script>
+</body>
+</html>

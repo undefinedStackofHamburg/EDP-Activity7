@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LibSys — Users</title>
+  <link rel="icon" href="LibSysLogo-mini.png">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="app-shell" class="app-shell">
+  <div class="main-area">
+    <div class="page-content">
+      <section class="page-section active">
+
+        <div class="page-header anim">
+          <div class="page-header-left">
+            <div class="page-title">User Management</div>
+            <div class="page-subtitle" id="users-count">— accounts</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="search-bar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="user-search" placeholder="Search username or name…"/>
+            </div>
+            <button class="btn btn-primary" onclick="openAddUser()">+ Add Account</button>
+          </div>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="tabs anim">
+          <button class="tab-btn active" onclick="setUserFilter('all',this)">All</button>
+          <button class="tab-btn" onclick="setUserFilter('active',this)">Active</button>
+          <button class="tab-btn" onclick="setUserFilter('inactive',this)">Inactive</button>
+        </div>
+
+        <div class="card anim">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Account</th>
+                <th>Role</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr></thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ══════════════════════════════════════════
+     ADD ACCOUNT MODAL
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-add-user">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title">Add Account</div>
+      <button class="modal-close" onclick="closeModal('modal-add-user')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Username <span style="color:var(--accent)">*</span></label>
+          <input class="form-input" id="add-user-username" type="text" placeholder="e.g. jdelacruz"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select class="form-select" id="add-user-role">
+            <option value="Staff">Staff</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Full Name <span style="color:var(--accent)">*</span></label>
+        <input class="form-input" id="add-user-fullname" type="text" placeholder="Juan Dela Cruz"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="add-user-email" type="email" placeholder="juan@libsys.local"/>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Password <span style="color:var(--accent)">*</span></label>
+          <div style="position:relative">
+            <input class="form-input" id="add-user-pass" type="password" placeholder="Min. 6 characters" style="padding-right:38px"/>
+            <button type="button" onclick="toggleEye('add-user-pass','add-eye-pass-show','add-eye-pass-hide')"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                           background:none;border:none;cursor:pointer;padding:0;
+                           color:var(--muted);display:flex;align-items:center" title="Show/hide">
+              <svg id="add-eye-pass-show" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg id="add-eye-pass-hide" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <div style="position:relative">
+            <input class="form-input" id="add-user-pass2" type="password" placeholder="Repeat password" style="padding-right:38px"/>
+            <button type="button" onclick="toggleEye('add-user-pass2','add-eye-pass2-show','add-eye-pass2-hide')"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                           background:none;border:none;cursor:pointer;padding:0;
+                           color:var(--muted);display:flex;align-items:center" title="Show/hide">
+              <svg id="add-eye-pass2-show" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg id="add-eye-pass2-hide" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-note">New accounts are set to <strong>Active</strong> by default.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-user')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAddUser()">+ Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     EDIT ACCOUNT MODAL (profile + status)
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-edit-user">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title">Edit Account</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-user')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-user-id"/>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <!-- Username is read-only after creation -->
+        <input class="form-input" id="edit-user-username" type="text" disabled
+               style="opacity:0.5;cursor:not-allowed"/>
+        <div class="form-note">Username cannot be changed after creation.</div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select class="form-select" id="edit-user-role">
+            <option value="Staff">Staff</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select" id="edit-user-status">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" id="edit-user-fullname" type="text"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="edit-user-email" type="email"/>
+      </div>
+      <div class="form-note" style="color:var(--amber)">
+        Setting status to <strong>Inactive</strong> will prevent this account from logging in.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-edit-user')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditUser()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CHANGE PASSWORD MODAL
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-change-pass">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">Change Password</div>
+      <button class="modal-close" onclick="closeModal('modal-change-pass')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="chpass-user-id"/>
+      <div id="chpass-user-label"
+           style="padding:10px 12px;background:var(--bg2);border-radius:8px;
+                  font-size:0.8rem;color:var(--ghost);margin-bottom:16px;
+                  border:1px solid var(--border)"></div>
+      <div class="form-group">
+        <label class="form-label">Current Password <span style="color:var(--accent)">*</span></label>
+        <div style="position:relative">
+          <input class="form-input" id="chpass-current" type="password" placeholder="Current password" style="padding-right:38px"/>
+          <button type="button" onclick="toggleEye('chpass-current','chp-eye-cur-show','chp-eye-cur-hide')"
+                  style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                         background:none;border:none;cursor:pointer;padding:0;
+                         color:var(--muted);display:flex;align-items:center" title="Show/hide">
+            <svg id="chp-eye-cur-show" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="chp-eye-cur-hide" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">New Password <span style="color:var(--accent)">*</span></label>
+        <div style="position:relative">
+          <input class="form-input" id="chpass-new" type="password" placeholder="Min. 6 characters" style="padding-right:38px"/>
+          <button type="button" onclick="toggleEye('chpass-new','chp-eye-new-show','chp-eye-new-hide')"
+                  style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                         background:none;border:none;cursor:pointer;padding:0;
+                         color:var(--muted);display:flex;align-items:center" title="Show/hide">
+            <svg id="chp-eye-new-show" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="chp-eye-new-hide" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm New Password</label>
+        <div style="position:relative">
+          <input class="form-input" id="chpass-confirm" type="password" placeholder="Repeat new password" style="padding-right:38px"/>
+          <button type="button" onclick="toggleEye('chpass-confirm','chp-eye-conf-show','chp-eye-conf-hide')"
+                  style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                         background:none;border:none;cursor:pointer;padding:0;
+                         color:var(--muted);display:flex;align-items:center" title="Show/hide">
+            <svg id="chp-eye-conf-show" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="chp-eye-conf-hide" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-change-pass')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveChangePassword()">Update Password</button>
+    </div>
+  </div>
+</div>
+
+<script src="sidebar.js"></script>
+<script src="shell.js"></script>
+<script src="app.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════
+//  USERS PAGE LOGIC
+// ══════════════════════════════════════════════════════════════
+
+let allUsers    = [];
+let userFilter  = 'all';
+let userSearch  = '';
+
+// ── Filter tabs ───────────────────────────────────────────────
+function setUserFilter(filter, btn) {
+  userFilter = filter;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderUsersTable();
+}
+
+// ── Search ────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('user-search').addEventListener('input', e => {
+    userSearch = e.target.value;
+    renderUsersTable();
+  });
+  renderUsers();
+});
+
+// ── Fetch from API and render ──────────────────────────────────
+async function renderUsers() {
+  tableLoading('users-tbody', 6);
+  try {
+    allUsers = await apiFetch('/users');
+    renderUsersTable();
+  } catch (err) { console.error('Users error:', err); }
+}
+
+function renderUsersTable() {
+  const s = userSearch.toLowerCase();
+  const filtered = allUsers.filter(u => {
+    const matchFilter =
+      userFilter === 'all' ||
+      u.status.toLowerCase() === userFilter;
+    const matchSearch =
+      !s ||
+      u.username.toLowerCase().includes(s) ||
+      u.fullName.toLowerCase().includes(s) ||
+      (u.email || '').toLowerCase().includes(s);
+    return matchFilter && matchSearch;
+  });
+
+  document.getElementById('users-count').textContent =
+    `${filtered.length} account${filtered.length !== 1 ? 's' : ''}`;
+
+  const tbody = document.getElementById('users-tbody');
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="6">
+      <div class="empty-state"><p>No accounts found.</p></div>
+    </td></tr>`;
+    return;
+  }
+
+  // Get current logged-in user to protect their own account
+  let currentUserId = 0;
+  try {
+    const cu = JSON.parse(sessionStorage.getItem('libsys_user') || '{}');
+    currentUserId = cu.id || 0;
+  } catch (_) {}
+
+  tbody.innerHTML = filtered.map(u => {
+    const [ac, bc] = avatarColor(u.fullName || u.username);
+    const ini = initials(
+      (u.fullName || u.username).split(' ')[0],
+      (u.fullName || u.username).split(' ')[1] || ''
+    );
+    const isActive   = u.status === 'Active';
+    const isSelf     = u.id === currentUserId;
+    const roleBadge  = u.role === 'Admin'
+      ? `<span class="pill" style="background:rgba(232,98,26,0.15);color:var(--accent2)">Admin</span>`
+      : `<span class="pill">Staff</span>`;
+
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="avatar"
+               style="background:${bc};color:${ac};font-size:0.7rem;font-weight:700">
+            ${ini}
+          </div>
+          <div>
+            <div class="td-title" style="font-size:0.82rem">${u.fullName}</div>
+            <div class="td-sub" style="font-family:var(--font-mono)">@${u.username}${isSelf ? ' <span style="color:var(--accent2)">(you)</span>' : ''}</div>
+          </div>
+        </div>
+      </td>
+      <td>${roleBadge}</td>
+      <td style="color:var(--ghost);font-size:0.78rem">${u.email || '—'}</td>
+      <td>
+        <span class="status ${isActive ? 'status-active' : 'status-suspended'}">
+          ${u.status}
+        </span>
+      </td>
+      <td style="color:var(--ghost);font-size:0.78rem">${formatDate(u.createdAt)}</td>
+      <td>
+        <div style="display:flex;gap:5px">
+          <button class="btn btn-sm btn-secondary btn-icon"
+                  onclick="openEditUser(${u.id})" title="Edit profile">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn btn-sm btn-secondary btn-icon"
+                  onclick="openChangePassword(${u.id}, this.dataset.name)" data-name="${u.fullName.replace(/"/g,'&quot;')}"
+                  title="Change password">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </button>
+          ${!isSelf ? `
+          <button class="btn btn-sm ${isActive ? 'btn-ghost-red' : 'btn-primary'}"
+                  onclick="toggleUserStatus(${u.id},'${u.status}')"
+                  title="${isActive ? 'Deactivate' : 'Activate'}">
+            ${isActive ? 'Deactivate' : 'Activate'}
+          </button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── ADD ACCOUNT ───────────────────────────────────────────────
+function openAddUser() {
+  document.getElementById('add-user-username').value = '';
+  document.getElementById('add-user-fullname').value = '';
+  document.getElementById('add-user-email').value    = '';
+  document.getElementById('add-user-pass').value     = '';
+  document.getElementById('add-user-pass2').value    = '';
+  document.getElementById('add-user-role').value     = 'Staff';
+  openModal('modal-add-user');
+}
+
+async function saveAddUser() {
+  const username = document.getElementById('add-user-username').value.trim();
+  const fullName = document.getElementById('add-user-fullname').value.trim();
+  const email    = document.getElementById('add-user-email').value.trim();
+  const role     = document.getElementById('add-user-role').value;
+  const pass     = document.getElementById('add-user-pass').value;
+  const pass2    = document.getElementById('add-user-pass2').value;
+
+  if (!username)         { toast('Username is required.', 'error'); return; }
+  if (!fullName)         { toast('Full name is required.', 'error'); return; }
+  if (!pass)             { toast('Password is required.', 'error'); return; }
+  if (pass.length < 6)   { toast('Password must be at least 6 characters.', 'error'); return; }
+  if (pass !== pass2)    { toast('Passwords do not match.', 'error'); return; }
+
+  try {
+    await apiFetch('/users', {
+      method: 'POST',
+      body: JSON.stringify({ username, fullName, email, role, password: pass })
+    });
+    closeModal('modal-add-user');
+    toast('Account created!');
+    renderUsers();
+  } catch (err) { /* handled by apiFetch */ }
+}
+
+// ── EDIT ACCOUNT ──────────────────────────────────────────────
+async function openEditUser(id) {
+  try {
+    const u = await apiFetch(`/users/${id}`);
+    document.getElementById('edit-user-id').value       = u.id;
+    document.getElementById('edit-user-username').value = u.username;
+    document.getElementById('edit-user-fullname').value = u.fullName;
+    document.getElementById('edit-user-email').value    = u.email;
+    document.getElementById('edit-user-role').value     = u.role;
+    document.getElementById('edit-user-status').value   = u.status;
+    openModal('modal-edit-user');
+  } catch (err) { /* handled */ }
+}
+
+async function saveEditUser() {
+  const id = parseInt(document.getElementById('edit-user-id').value);
+  try {
+    await apiFetch(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        fullName: document.getElementById('edit-user-fullname').value.trim(),
+        email:    document.getElementById('edit-user-email').value.trim(),
+        role:     document.getElementById('edit-user-role').value,
+        status:   document.getElementById('edit-user-status').value,
+      })
+    });
+    closeModal('modal-edit-user');
+    toast('Account updated!');
+    renderUsers();
+  } catch (err) { /* handled */ }
+}
+
+// ── QUICK TOGGLE STATUS ───────────────────────────────────────
+async function toggleUserStatus(id, currentStatus) {
+  const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+  const action    = newStatus === 'Inactive' ? 'deactivate' : 'activate';
+  if (!confirm(`Are you sure you want to ${action} this account?`)) return;
+
+  try {
+    // Fetch the current profile first, then update only status
+    const u = await apiFetch(`/users/${id}`);
+    await apiFetch(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        fullName: u.fullName,
+        email:    u.email,
+        role:     u.role,
+        status:   newStatus,
+      })
+    });
+    toast(`Account ${newStatus === 'Active' ? 'activated' : 'deactivated'}.`,
+          newStatus === 'Active' ? 'success' : 'warn');
+    renderUsers();
+  } catch (err) { /* handled */ }
+}
+
+// ── EYE TOGGLE HELPER ────────────────────────────────────────
+function toggleEye(inputId, showIconId, hideIconId) {
+  const input    = document.getElementById(inputId);
+  const showIcon = document.getElementById(showIconId);
+  const hideIcon = document.getElementById(hideIconId);
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  showIcon.style.display = isHidden ? 'none' : '';
+  hideIcon.style.display = isHidden ? ''     : 'none';
+}
+
+// ── CHANGE PASSWORD ───────────────────────────────────────────
+function openChangePassword(id, fullName) {
+  document.getElementById('chpass-user-id').value   = id;
+  document.getElementById('chpass-user-label').textContent =
+    `Changing password for: ${fullName}`;
+  document.getElementById('chpass-current').value  = '';
+  document.getElementById('chpass-new').value      = '';
+  document.getElementById('chpass-confirm').value  = '';
+  // Reset eye icons
+  ['chp-eye-cur-show','chp-eye-new-show','chp-eye-conf-show'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = '';
+  });
+  ['chp-eye-cur-hide','chp-eye-new-hide','chp-eye-conf-hide'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+  ['chpass-current','chpass-new','chpass-confirm'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.type = 'password';
+  });
+  openModal('modal-change-pass');
+}
+
+async function saveChangePassword() {
+  const id         = parseInt(document.getElementById('chpass-user-id').value);
+  const current    = document.getElementById('chpass-current').value;
+  const newPass    = document.getElementById('chpass-new').value;
+  const confirmVal = document.getElementById('chpass-confirm').value;
+
+  if (!current)              { toast('Current password is required.', 'error'); return; }
+  if (!newPass)              { toast('New password is required.', 'error'); return; }
+  if (newPass.length < 6)    { toast('New password must be at least 6 characters.', 'error'); return; }
+  if (newPass !== confirmVal) { toast('Passwords do not match.', 'error'); return; }
+
+  try {
+    await apiFetch(`/users/${id}/password`, {
+      method: 'POST',
+      body: JSON.stringify({ currentPassword: current, newPassword: newPass })
+    });
+    closeModal('modal-change-pass');
+    toast('Password updated successfully!');
+  } catch (err) { /* handled by apiFetch */ }
+}
+</script>
+</body>
+</html>

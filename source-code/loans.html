@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LibSys — Loans</title>
+  <link rel="icon" href="LibSysLogo-mini.png">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="app-shell" class="app-shell">
+  <div class="main-area">
+    <div class="page-content">
+      <section class="page-section active">
+        <div class="page-header anim">
+          <div class="page-header-left">
+            <div class="page-title">Loans</div>
+            <div class="page-subtitle" id="loans-count">— records</div>
+          </div>
+          <button class="btn btn-primary" onclick="openAddLoan()">+ Add Loan</button>
+        </div>
+
+        <div class="tabs anim">
+          <button class="tab-btn active" onclick="setLoanFilter('all',this)">All</button>
+          <button class="tab-btn" onclick="setLoanFilter('active',this)">Active</button>
+          <button class="tab-btn" onclick="setLoanFilter('overdue',this)">Overdue</button>
+          <button class="tab-btn" onclick="setLoanFilter('returned',this)">Returned</button>
+        </div>
+
+        <div class="card anim">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>#</th><th>Member</th><th>Book</th><th>Loan Date</th><th>Due Date</th><th>Return Date</th><th>Status</th><th>Fine</th><th>Action</th>
+              </tr></thead>
+              <tbody id="loans-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ADD LOAN -->
+<div class="modal-overlay" id="modal-add-loan">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Loan</div>
+      <button class="modal-close" onclick="closeModal('modal-add-loan')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Book <span style="color:var(--accent)">*</span></label>
+        <select class="form-select" id="loan-book"></select>
+        <div class="form-note">Only books with available copies are shown.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Member <span style="color:var(--accent)">*</span></label>
+        <select class="form-select" id="loan-member"></select>
+        <div class="form-note">Only Active members are shown.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Loan Duration (days)</label>
+        <input class="form-input" type="number" id="loan-days" value="14" min="1" max="90"/>
+        <div class="form-note">Fine rate: ₱5.00/day overdue</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-loan')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAddLoan()">Create Loan</button>
+    </div>
+  </div>
+</div>
+
+<!-- RETURN BOOK -->
+<div class="modal-overlay" id="modal-return-book">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Return Book</div>
+      <button class="modal-close" onclick="closeModal('modal-return-book')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="padding:12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);margin-bottom:16px;font-size:0.82rem;color:var(--ghost)" id="return-loan-info"></div>
+      <input type="hidden" id="return-loan-id"/>
+      <div class="form-group">
+        <label class="form-label">Return Date</label>
+        <input class="form-input" type="date" id="return-date"/>
+        <div class="form-note">Fine of ₱5.00/day will be calculated if past due date.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-return-book')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveReturn()">Confirm Return</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script src="sidebar.js"></script>
+<script src="shell.js"></script>
+<script>
+function setLoanFilter(filter, btn) {
+  loanFilter = filter;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLoans();
+}
+document.addEventListener('DOMContentLoaded', renderLoans);
+</script>
+</body>
+</html>

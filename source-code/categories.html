@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LibSys — Categories</title>
+  <link rel="icon" href="LibSysLogo-mini.png">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="app-shell" class="app-shell">
+  <div class="main-area">
+    <div class="page-content">
+      <section class="page-section active">
+        <div class="page-header anim">
+          <div class="page-header-left">
+            <div class="page-title">Categories</div>
+            <div class="page-subtitle">Book genre categories</div>
+          </div>
+          <button class="btn btn-primary" onclick="addCategory()">+ Add Category</button>
+        </div>
+        <div class="card anim">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Name</th><th>Description</th><th>Books</th><th>Edit</th></tr></thead>
+              <tbody id="categories-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<!-- EDIT CATEGORY -->
+<div class="modal-overlay" id="modal-edit-cat">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">Edit Category</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-cat')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-cat-id"/>
+      <div class="form-group">
+        <label class="form-label">Category Name</label>
+        <input class="form-input" id="edit-cat-name" type="text"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input class="form-input" id="edit-cat-desc" type="text"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-edit-cat')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditCategory()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CATEGORY -->
+<div class="modal-overlay" id="modal-add-cat">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">Add Category</div>
+      <button class="modal-close" onclick="closeModal('modal-add-cat')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Category Name <span style="color:var(--accent)">*</span></label>
+        <input class="form-input" id="add-cat-name" type="text" placeholder="e.g. Romance"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input class="form-input" id="add-cat-desc" type="text" placeholder="Short description…"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-cat')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAddCategory()">+ Add Category</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script src="sidebar.js"></script>
+<script src="shell.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', renderCategories);
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LibSys — Books</title>
+  <link rel="icon" href="LibSysLogo-mini.png">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="app-shell" class="app-shell">
+  <div class="main-area">
+    <div class="page-content">
+      <section class="page-section active">
+        <div class="page-header anim">
+          <div class="page-header-left">
+            <div class="page-title">Books</div>
+            <div class="page-subtitle" id="books-count">— books</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="search-bar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="book-search" placeholder="Search title, author, ISBN…"/>
+            </div>
+            <button class="btn btn-primary" onclick="addBook()">+ Add Book</button>
+          </div>
+        </div>
+        <div class="card anim">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>#</th><th>Title / Author</th><th>Category</th><th>ISBN</th><th>Copies</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="books-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ADD COPIES -->
+<div class="modal-overlay" id="modal-edit-book">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Copies</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-book')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-book-id"/>
+      <input type="hidden" id="edit-book-total"/>
+      <input type="hidden" id="edit-book-avail"/>
+      <input type="hidden" id="edit-book-author"/>
+      <input type="hidden" id="edit-book-cat"/>
+      <input type="hidden" id="edit-book-isbn"/>
+      <input type="hidden" id="edit-book-year"/>
+      <input type="hidden" id="edit-book-title-val"/>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:16px">
+        <div style="font-size:0.82rem;font-weight:600;color:var(--fg);margin-bottom:6px" id="edit-book-title-display">—</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <span style="font-size:0.72rem;color:var(--muted)">Author: <span id="edit-book-author-display" style="color:var(--fg)">—</span></span>
+          <span style="font-size:0.72rem;color:var(--muted)">Category: <span id="edit-book-cat-display" style="color:var(--fg)">—</span></span>
+          <span style="font-size:0.72rem;color:var(--muted)">ISBN: <span id="edit-book-isbn-display" style="color:var(--fg)">—</span></span>
+          <span style="font-size:0.72rem;color:var(--muted)">Year: <span id="edit-book-year-display" style="color:var(--fg)">—</span></span>
+        </div>
+        <div style="margin-top:8px;font-size:0.72rem;color:var(--muted)">
+          Current stock: <span id="edit-book-stock-display" style="color:var(--fg);font-weight:600">—</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Copies to Add <span style="color:var(--accent)">*</span></label>
+        <input class="form-input" id="edit-book-add-copies" type="number" min="1" value="1"/>
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:4px">How many new copies to add to the existing stock.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-edit-book')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditBook()">+ Add Copies</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD BOOK -->
+<div class="modal-overlay" id="modal-add-book">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Book</div>
+      <button class="modal-close" onclick="closeModal('modal-add-book')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Title <span style="color:var(--accent)">*</span></label>
+        <input class="form-input" id="add-book-title" type="text" placeholder="Book title"/>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Author</label>
+          <select class="form-select" id="add-book-author"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="add-book-cat"></select>
+        </div>
+      </div>
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label class="form-label">ISBN</label>
+          <input class="form-input" id="add-book-isbn" type="text" placeholder="000-00000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Year Published</label>
+          <input class="form-input" id="add-book-year" type="number" placeholder="2024"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total Copies</label>
+          <input class="form-input" id="add-book-total" type="number" value="1" min="1"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-book')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAddBook()">+ Add Book</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script src="sidebar.js"></script>
+<script src="shell.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('book-search').addEventListener('input', e => {
+    bookSearch = e.target.value; renderBooks();
+  });
+  renderBooks();
+});
+</script>
+</body>
+</html>

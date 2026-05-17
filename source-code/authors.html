@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LibSys — Authors</title>
+
+  <link rel="icon" href="LibSysLogo-mini.png">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="app-shell" class="app-shell">
+  <div class="main-area">
+    <div class="page-content">
+      <section class="page-section active">
+        <div class="page-header anim">
+          <div class="page-header-left">
+            <div class="page-title">Authors</div>
+            <div class="page-subtitle">Registered book authors</div>
+          </div>
+          <button class="btn btn-primary" onclick="addAuthor()">+ Add Author</button>
+        </div>
+        <div class="card anim">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Name</th><th>Nationality</th><th>Birth Year</th><th>Books</th><th>Edit</th></tr></thead>
+              <tbody id="authors-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<!-- EDIT AUTHOR -->
+<div class="modal-overlay" id="modal-edit-author">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title">Edit Author</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-author')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-author-id"/>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input class="form-input" id="edit-author-fn" type="text"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input class="form-input" id="edit-author-ln" type="text"/>
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Nationality</label>
+          <input class="form-input" id="edit-author-nat" type="text"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Birth Year</label>
+          <input class="form-input" id="edit-author-year" type="number"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-edit-author')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditAuthor()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD AUTHOR -->
+<div class="modal-overlay" id="modal-add-author">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title">Add Author</div>
+      <button class="modal-close" onclick="closeModal('modal-add-author')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">First Name <span style="color:var(--accent)">*</span></label>
+          <input class="form-input" id="add-author-fn" type="text" placeholder="First"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name <span style="color:var(--accent)">*</span></label>
+          <input class="form-input" id="add-author-ln" type="text" placeholder="Last"/>
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Nationality</label>
+          <input class="form-input" id="add-author-nat" type="text" placeholder="Filipino"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Birth Year</label>
+          <input class="form-input" id="add-author-year" type="number" placeholder="2000"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-author')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAddAuthor()">+ Add Author</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script src="sidebar.js"></script>
+<script src="shell.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', renderAuthors);
+</script>
+</body>
+</html>

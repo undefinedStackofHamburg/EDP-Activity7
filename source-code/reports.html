@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LibSys — Reports</title>
+  <link rel="icon" href="LibSysLogo-mini.png">
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* ── Report page specific ── */
+    .rpt-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* Report selector panel */
+    .rpt-selector {
+      position: sticky;
+      top: 20px;
+    }
+    .rpt-selector .card { padding: 0; overflow: hidden; }
+    .rpt-selector-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 14px 16px 8px;
+    }
+    .rpt-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+      border-bottom: 1px solid var(--border);
+    }
+    .rpt-option:last-of-type { border-bottom: none; }
+    .rpt-option:hover { background: var(--bg2); }
+    .rpt-option.active {
+      background: rgba(232,98,26,0.07);
+      border-left-color: var(--accent);
+    }
+    .rpt-option-icon {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .rpt-option-text { flex: 1; min-width: 0; }
+    .rpt-option-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--snow);
+    }
+    .rpt-option-desc {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+    .rpt-option.active .rpt-option-name { color: var(--accent2); }
+
+    /* Report output area */
+    .rpt-output { }
+    .rpt-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .rpt-toolbar-left {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .rpt-filter-group {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .rpt-filter-label {
+      font-size: 0.72rem;
+      color: var(--ghost);
+      font-weight: 600;
+    }
+    .rpt-filter-select {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      color: var(--text);
+      font-family: var(--font-body);
+      outline: none;
+      cursor: pointer;
+    }
+    .rpt-filter-select:focus { border-color: var(--accent); }
+
+    /* Report preview card */
+    .rpt-preview {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .rpt-preview-header {
+      padding: 20px 24px 16px;
+      border-bottom: 2px solid var(--accent);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .rpt-preview-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--snow);
+      letter-spacing: -0.02em;
+    }
+    .rpt-preview-meta {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 3px;
+      font-family: var(--font-mono);
+    }
+    .rpt-preview-logo {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--accent);
+      opacity: 0.6;
+    }
+
+    /* Summary row above table */
+    .rpt-summary-row {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .rpt-sum-cell {
+      flex: 1;
+      padding: 14px 20px;
+      border-right: 1px solid var(--border);
+      text-align: center;
+    }
+    .rpt-sum-cell:last-child { border-right: none; }
+    .rpt-sum-val {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--snow);
+    }
+    .rpt-sum-lbl {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .rpt-table-wrap { overflow-x: auto; }
+    .rpt-table-wrap table { border-radius: 0; }
+    .rpt-table-wrap thead th {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+    .rpt-table-wrap tbody td {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .rpt-footer-note {
+      padding: 12px 20px;
+      font-size: 0.68rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Empty state */
+    .rpt-empty {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .rpt-empty svg { opacity: 0.3; margin-bottom: 12px; }
+    .rpt-empty p { font-size: 0.82rem; }
+</style>
+</head>
+<body>
+<div id="app-shell" class="app-shell">
+  <div class="main-area">
+    <div class="page-content">
+
+      <section class="page-section active">
+        <div class="page-header anim">
+          <div class="page-header-left">
+            <div class="page-title">Reports</div>
+            <div class="page-subtitle">Generate and download library reports</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <label style="font-size:0.7rem;color:var(--ghost);font-weight:600;letter-spacing:0.04em">SIGNATORY</label>
+              <input id="signatory-input" type="text" placeholder="Name of signatory…"
+                style="font-size:0.78rem;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--snow);width:200px;outline:none"
+                onkeydown="if(event.key==='Enter')downloadReport(currentReport)" />
+            </div>
+            <button class="btn btn-primary" onclick="downloadReport(currentReport)" style="align-self:flex-end">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download Excel
+            </button>
+          </div>
+        </div>
+
+        <div class="rpt-layout anim">
+
+          <!-- ── Selector panel ── -->
+          <div class="rpt-selector">
+            <div class="card">
+              <div class="rpt-selector-title">Report Type</div>
+
+              <div class="rpt-option active" data-report="loans" onclick="selectReport('loans', this)">
+                <div class="rpt-option-icon" style="background:rgba(74,125,192,0.12);color:#4A7DC0">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+                </div>
+                <div class="rpt-option-text">
+                  <div class="rpt-option-name">Loans Summary</div>
+                  <div class="rpt-option-desc">All loan records &amp; status</div>
+                </div>
+              </div>
+
+              <div class="rpt-option" data-report="overdue" onclick="selectReport('overdue', this)">
+                <div class="rpt-option-icon" style="background:rgba(192,57,43,0.10);color:var(--red)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div class="rpt-option-text">
+                  <div class="rpt-option-name">Overdue Report</div>
+                  <div class="rpt-option-desc">Overdue &amp; unpaid fines</div>
+                </div>
+              </div>
+
+              <div class="rpt-option" data-report="inventory" onclick="selectReport('inventory', this)">
+                <div class="rpt-option-icon" style="background:rgba(232,98,26,0.10);color:var(--accent)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                </div>
+                <div class="rpt-option-text">
+                  <div class="rpt-option-name">Books Inventory</div>
+                  <div class="rpt-option-desc">Stock levels by category</div>
+                </div>
+              </div>
+
+              <div class="rpt-option" data-report="fines" onclick="selectReport('fines', this)">
+                <div class="rpt-option-icon" style="background:rgba(217,119,6,0.10);color:var(--amber)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div class="rpt-option-text">
+                  <div class="rpt-option-name">Fines Report</div>
+                  <div class="rpt-option-desc">Fine collection summary</div>
+                </div>
+              </div>
+
+              <div class="rpt-option" data-report="members" onclick="selectReport('members', this)">
+                <div class="rpt-option-icon" style="background:rgba(74,140,58,0.10);color:var(--sage)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="rpt-option-text">
+                  <div class="rpt-option-name">Members Report</div>
+                  <div class="rpt-option-desc">Member list &amp; status</div>
+                </div>
+              </div>
+
+            </div><!-- end card -->
+          </div><!-- end selector -->
+
+          <!-- ── Report output ── -->
+          <div class="rpt-output">
+            <!-- Toolbar / filters -->
+            <div class="rpt-toolbar">
+              <div class="rpt-toolbar-left" id="rpt-filters"></div>
+              <div style="font-size:0.7rem;color:var(--muted);font-family:var(--font-mono)" id="rpt-row-count"></div>
+            </div>
+
+            <!-- Preview -->
+            <div class="rpt-preview" id="rpt-preview-wrap">
+              <div class="rpt-preview-header">
+                <div>
+                  <div class="rpt-preview-title" id="rpt-title">Loans Summary Report</div>
+                  <div class="rpt-preview-meta" id="rpt-meta"></div>
+                </div>
+                <div class="rpt-preview-logo">LibSys</div>
+              </div>
+              <div class="rpt-summary-row" id="rpt-summary-row"></div>
+              <div class="rpt-table-wrap" id="rpt-table-area"></div>
+              <div class="rpt-footer-note">
+                <span>LibSys — Library Management System</span>
+                <span id="rpt-footer-date"></span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+<script src="app.js"></script>
+<script src="sidebar.js"></script>
+<script src="shell.js"></script>
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let currentReport = 'loans';
+let reportFilters  = {};
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('rpt-footer-date').textContent =
+    'Generated: ' + new Date().toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  renderReport('loans');
+});
+
+// ── SELECT REPORT ──────────────────────────────────────────────────────────
+function selectReport(type, el) {
+  document.querySelectorAll('.rpt-option').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  currentReport = type;
+  reportFilters = {};
+  renderReport(type);
+}
+
+// ── RENDER DISPATCHER ──────────────────────────────────────────────────────
+function renderReport(type) {
+  const renders = {
+    loans:     renderLoansReport,
+    overdue:   renderOverdueReport,
+    inventory: renderInventoryReport,
+    fines:     renderFinesReport,
+    members:   renderMembersReport,
+  };
+  if (renders[type]) renders[type]();
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function setReportTitle(title, subtitle) {
+  document.getElementById('rpt-title').textContent = title;
+  document.getElementById('rpt-meta').textContent  = subtitle;
+}
+function setSummaryRow(cells) {
+  document.getElementById('rpt-summary-row').innerHTML = cells.map(c =>
+    `<div class="rpt-sum-cell">
+      <div class="rpt-sum-val" style="color:${c.color||'var(--snow)'}">${c.val}</div>
+      <div class="rpt-sum-lbl">${c.lbl}</div>
+    </div>`
+  ).join('');
+}
+function setFilters(html) {
+  document.getElementById('rpt-filters').innerHTML = html;
+}
+function setRowCount(n, label) {
+  document.getElementById('rpt-row-count').textContent = `${n} ${label}`;
+}
+function setTableHTML(html) {
+  document.getElementById('rpt-table-area').innerHTML = html;
+}
+function setTableLoading() {
+  setTableHTML('<div class="rpt-empty"><p>Loading...</p></div>');
+}
+function setTableError(msg) {
+  setTableHTML(`<div class="rpt-empty"><p style="color:var(--red)">${msg}</p></div>`);
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' });
+}
+
+// ── 1. LOANS SUMMARY ──────────────────────────────────────────────────────
+async function renderLoansReport() {
+  const statusFilter = reportFilters.status || 'all';
+  setReportTitle('Loans Summary Report', 'Complete record of all library loan transactions');
+  setFilters(`
+    <div class="rpt-filter-group">
+      <span class="rpt-filter-label">Status:</span>
+      <select class="rpt-filter-select" onchange="reportFilters.status=this.value;renderLoansReport()">
+        <option value="all"      ${statusFilter==='all'     ?'selected':''}>All</option>
+        <option value="Active"   ${statusFilter==='Active'  ?'selected':''}>Active</option>
+        <option value="Returned" ${statusFilter==='Returned'?'selected':''}>Returned</option>
+        <option value="Overdue"  ${statusFilter==='Overdue' ?'selected':''}>Overdue</option>
+      </select>
+    </div>`);
+  setTableLoading();
+
+  let loans;
+  try { loans = await apiFetch('/loans'); }
+  catch { setTableError('Could not load loans. Is the API server running?'); return; }
+
+  let rows = statusFilter === 'all' ? loans : loans.filter(l => l.status === statusFilter);
+  const active   = rows.filter(l => l.status === 'Active').length;
+  const returned = rows.filter(l => l.status === 'Returned').length;
+  const overdue  = rows.filter(l => l.status === 'Overdue').length;
+  const fines    = rows.reduce((s, l) => s + (l.fineAmount || 0), 0);
+
+  setSummaryRow([
+    { val: rows.length,             lbl: 'Total Loans',  color:'var(--snow)'    },
+    { val: active,                  lbl: 'Active',       color:'#4A7DC0'        },
+    { val: returned,                lbl: 'Returned',     color:'var(--accent2)' },
+    { val: overdue,                 lbl: 'Overdue',      color:'var(--red)'     },
+    { val: `₱${fines.toFixed(2)}`, lbl: 'Total Fines',  color:'var(--amber)'   },
+  ]);
+  setRowCount(rows.length, 'loans');
+
+  if (!rows.length) { setTableHTML('<div class="rpt-empty"><p>No loans match the selected filter.</p></div>'); return; }
+
+  setTableHTML(`<table>
+    <thead><tr>
+      <th>#</th><th>Member</th><th>Book</th>
+      <th>Loan Date</th><th>Due Date</th><th>Return Date</th><th>Status</th><th>Fine</th>
+    </tr></thead>
+    <tbody>${rows.map(l => `<tr>
+      <td class="td-mono">#${l.id}</td>
+      <td class="td-title" style="font-size:0.8rem">${l.memberName||'—'}</td>
+      <td style="font-size:0.78rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.bookTitle||'—'}</td>
+      <td style="font-size:0.75rem">${fmtDate(l.loanDate)}</td>
+      <td style="font-size:0.75rem">${fmtDate(l.dueDate)}</td>
+      <td style="font-size:0.75rem">${fmtDate(l.returnDate)}</td>
+      <td>${statusBadge(l.status)}</td>
+      <td class="td-mono" style="color:${(l.fineAmount||0)>0?'var(--amber)':'var(--muted)'}">₱${(l.fineAmount||0).toFixed(2)}</td>
+    </tr>`).join('')}</tbody>
+  </table>`);
+}
+
+// ── 2. OVERDUE REPORT ─────────────────────────────────────────────────────
+async function renderOverdueReport() {
+  setReportTitle('Overdue Loans Report', 'Loans past their due date requiring immediate attention');
+  setFilters('');
+  setTableLoading();
+
+  let loans;
+  try { loans = await apiFetch('/loans'); }
+  catch { setTableError('Could not load loans. Is the API server running?'); return; }
+
+  const rows = loans.filter(l => l.status === 'Overdue' || (l.status === 'Active' && new Date(l.dueDate) < new Date()));
+  const totalFines    = rows.reduce((s,l) => s + (l.fineAmount||0), 0);
+  const uniqueMembers = new Set(rows.map(l => l.memberId)).size;
+
+  setSummaryRow([
+    { val: rows.length,                  lbl: 'Overdue Records',  color:'var(--red)'   },
+    { val: uniqueMembers,                lbl: 'Members Affected', color:'var(--amber)' },
+    { val: `₱${totalFines.toFixed(2)}`, lbl: 'Fines Due',        color:'var(--amber)' },
+  ]);
+  setRowCount(rows.length, 'overdue records');
+
+  if (!rows.length) { setTableHTML('<div class="rpt-empty"><p>No overdue loans found.</p></div>'); return; }
+
+  setTableHTML(`<table>
+    <thead><tr>
+      <th>#</th><th>Member</th><th>Book</th><th>Due Date</th><th>Days Late</th><th>Fine</th>
+    </tr></thead>
+    <tbody>${rows.map(l => {
+      const daysLate = Math.max(0, Math.ceil((new Date() - new Date(l.dueDate)) / 86400000));
+      return `<tr>
+        <td class="td-mono">#${l.id}</td>
+        <td class="td-title" style="font-size:0.8rem">${l.memberName||'—'}</td>
+        <td style="font-size:0.78rem">${l.bookTitle||'—'}</td>
+        <td style="font-size:0.75rem;color:var(--red)">${fmtDate(l.dueDate)}</td>
+        <td><span style="background:rgba(192,57,43,0.1);color:var(--red);font-size:0.72rem;padding:2px 8px;border-radius:100px;font-weight:600">${daysLate}d</span></td>
+        <td class="td-mono" style="color:var(--amber)">₱${(l.fineAmount||0).toFixed(2)}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`);
+}
+
+// ── 3. BOOKS INVENTORY ────────────────────────────────────────────────────
+async function renderInventoryReport() {
+  const catFilter = reportFilters.cat || 'all';
+  setReportTitle('Books Inventory Report', 'Stock levels and availability across the catalog');
+  setTableLoading();
+
+  let books, categories;
+  try { [books, categories] = await Promise.all([apiFetch('/books'), apiFetch('/categories')]); }
+  catch { setTableError('Could not load inventory. Is the API server running?'); return; }
+
+  setFilters(`
+    <div class="rpt-filter-group">
+      <span class="rpt-filter-label">Category:</span>
+      <select class="rpt-filter-select" onchange="reportFilters.cat=this.value;renderInventoryReport()">
+        <option value="all">All Categories</option>
+        ${categories.map(c => `<option value="${c.id}" ${catFilter==c.id?'selected':''}>${c.name}</option>`).join('')}
+      </select>
+    </div>`);
+
+  const rows        = catFilter === 'all' ? books : books.filter(b => b.catId == catFilter);
+  const totalCopies = rows.reduce((s,b) => s + (b.total||0), 0);
+  const totalAvail  = rows.reduce((s,b) => s + (b.available||0), 0);
+  const onLoan      = totalCopies - totalAvail;
+  const fullyOut    = rows.filter(b => b.available === 0).length;
+
+  setSummaryRow([
+    { val: rows.length,  lbl: 'Books',          color:'var(--snow)' },
+    { val: totalCopies,  lbl: 'Total Copies',   color:'var(--snow)' },
+    { val: totalAvail,   lbl: 'Available',       color:'var(--sage)' },
+    { val: onLoan,       lbl: 'On Loan',         color:'#4A7DC0'     },
+    { val: fullyOut,     lbl: 'Fully Borrowed',  color:'var(--red)'  },
+  ]);
+  setRowCount(rows.length, 'books');
+
+  if (!rows.length) { setTableHTML('<div class="rpt-empty"><p>No books found for the selected category.</p></div>'); return; }
+
+  setTableHTML(`<table>
+    <thead><tr>
+      <th>#</th><th>Title</th><th>Author</th><th>Category</th>
+      <th>ISBN</th><th>Year</th><th>Total</th><th>Available</th><th>On Loan</th>
+    </tr></thead>
+    <tbody>${rows.map(b => {
+      const onL        = (b.total||0) - (b.available||0);
+      const pct        = b.total ? Math.round((b.available/b.total)*100) : 0;
+      const availColor = b.available===0 ? 'var(--red)' : b.available<b.total*0.3 ? 'var(--amber)' : 'var(--sage)';
+      return `<tr>
+        <td class="td-mono">#${b.id}</td>
+        <td class="td-title" style="font-size:0.78rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.title}</td>
+        <td style="font-size:0.75rem;color:var(--ghost)">${b.authorName||'—'}</td>
+        <td><span class="pill pill-accent" style="font-size:0.65rem">${b.categoryName||'—'}</span></td>
+        <td class="td-mono" style="font-size:0.72rem">${b.isbn}</td>
+        <td style="font-size:0.75rem;color:var(--ghost)">${b.yearPub}</td>
+        <td style="font-size:0.8rem;font-weight:600;color:var(--snow)">${b.total}</td>
+        <td>
+          <span style="font-size:0.8rem;font-weight:700;color:${availColor}">${b.available}</span>
+          <div style="margin-top:3px;height:3px;background:var(--border);border-radius:2px;width:50px">
+            <div style="height:100%;width:${pct}%;background:${availColor};border-radius:2px"></div>
+          </div>
+        </td>
+        <td style="font-size:0.8rem;color:#4A7DC0;font-weight:600">${onL}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`);
+}
+
+// ── 4. FINES REPORT ───────────────────────────────────────────────────────
+async function renderFinesReport() {
+  setReportTitle('Fines Collection Report', 'Summary of all fines assessed and collected');
+  setFilters('');
+  setTableLoading();
+
+  let loans;
+  try { loans = await apiFetch('/loans'); }
+  catch { setTableError('Could not load fines. Is the API server running?'); return; }
+
+  const withFines  = loans.filter(l => (l.fineAmount||0) > 0);
+  const totalFines = withFines.reduce((s,l) => s + (l.fineAmount||0), 0);
+  const collected  = withFines.filter(l => l.status==='Returned').reduce((s,l) => s + (l.fineAmount||0), 0);
+  const pending    = withFines.filter(l => l.status!=='Returned').reduce((s,l) => s + (l.fineAmount||0), 0);
+
+  setSummaryRow([
+    { val: withFines.length,              lbl: 'Fined Loans',    color:'var(--snow)'  },
+    { val: `₱${totalFines.toFixed(2)}`,   lbl: 'Total Assessed', color:'var(--amber)' },
+    { val: `₱${collected.toFixed(2)}`,    lbl: 'Collected',      color:'var(--sage)'  },
+    { val: `₱${pending.toFixed(2)}`,      lbl: 'Pending',        color:'var(--red)'   },
+  ]);
+  setRowCount(withFines.length, 'records with fines');
+
+  if (!withFines.length) { setTableHTML('<div class="rpt-empty"><p>No fines recorded yet.</p></div>'); return; }
+
+  setTableHTML(`<table>
+    <thead><tr>
+      <th>Loan #</th><th>Member</th><th>Book</th>
+      <th>Due Date</th><th>Return Date</th><th>Fine Amount</th><th>Status</th>
+    </tr></thead>
+    <tbody>${withFines.map(l => {
+      const title = l.bookTitle||'—';
+      return `<tr>
+        <td class="td-mono">#${l.id}</td>
+        <td class="td-title" style="font-size:0.8rem">${l.memberName||'—'}</td>
+        <td style="font-size:0.78rem">${title.length>30?title.slice(0,30)+'…':title}</td>
+        <td style="font-size:0.75rem">${fmtDate(l.dueDate)}</td>
+        <td style="font-size:0.75rem">${fmtDate(l.returnDate)}</td>
+        <td class="td-mono" style="color:var(--amber);font-weight:700">₱${(l.fineAmount||0).toFixed(2)}</td>
+        <td>${statusBadge(l.status)}</td>
+      </tr>`;
+    }).join('')}</tbody>
+    <tfoot><tr style="border-top:2px solid var(--border)">
+      <td colspan="5" style="padding:10px 14px;font-size:0.78rem;font-weight:700;color:var(--ghost);text-align:right">Total</td>
+      <td class="td-mono" style="padding:10px 14px;font-weight:800;color:var(--amber);font-size:0.9rem">₱${totalFines.toFixed(2)}</td>
+      <td></td>
+    </tr></tfoot>
+  </table>`);
+}
+
+// ── 5. MEMBERS REPORT ─────────────────────────────────────────────────────
+async function renderMembersReport() {
+  const statusFilter = reportFilters.status || 'all';
+  setReportTitle('Members Report', 'Registered library member directory and status');
+  setFilters(`
+    <div class="rpt-filter-group">
+      <span class="rpt-filter-label">Status:</span>
+      <select class="rpt-filter-select" onchange="reportFilters.status=this.value;renderMembersReport()">
+        <option value="all"       ${statusFilter==='all'      ?'selected':''}>All</option>
+        <option value="Active"    ${statusFilter==='Active'   ?'selected':''}>Active</option>
+        <option value="Suspended" ${statusFilter==='Suspended'?'selected':''}>Suspended</option>
+        <option value="Expired"   ${statusFilter==='Expired'  ?'selected':''}>Expired</option>
+      </select>
+    </div>`);
+  setTableLoading();
+
+  let members, loans;
+  try { [members, loans] = await Promise.all([apiFetch('/members'), apiFetch('/loans')]); }
+  catch { setTableError('Could not load members. Is the API server running?'); return; }
+
+  const rows      = statusFilter === 'all' ? members : members.filter(m => m.status === statusFilter);
+  const active    = rows.filter(m => m.status === 'Active').length;
+  const suspended = rows.filter(m => m.status === 'Suspended').length;
+  const expired   = rows.filter(m => m.status === 'Expired').length;
+
+  setSummaryRow([
+    { val: rows.length, lbl: 'Total Members', color:'var(--snow)'  },
+    { val: active,      lbl: 'Active',        color:'var(--sage)'  },
+    { val: suspended,   lbl: 'Suspended',     color:'var(--amber)' },
+    { val: expired,     lbl: 'Expired',       color:'var(--muted)' },
+  ]);
+  setRowCount(rows.length, 'members');
+
+  if (!rows.length) { setTableHTML('<div class="rpt-empty"><p>No members match the selected filter.</p></div>'); return; }
+
+  setTableHTML(`<table>
+    <thead><tr>
+      <th>#</th><th>Name</th><th>Phone</th>
+      <th>Member Since</th><th>Total Loans</th><th>Active Loans</th><th>Status</th>
+    </tr></thead>
+    <tbody>${rows.map(m => {
+      const totalLoans  = loans.filter(l => l.memberId === m.id).length;
+      const activeLoans = loans.filter(l => l.memberId === m.id && l.status === 'Active').length;
+      return `<tr>
+        <td class="td-mono">#${m.id}</td>
+        <td class="td-title" style="font-size:0.82rem">${m.firstName} ${m.lastName}</td>
+        <td class="td-mono" style="font-size:0.75rem">${m.phone}</td>
+        <td style="font-size:0.75rem">${fmtDate(m.membershipDate)}</td>
+        <td style="font-size:0.8rem;text-align:center">${totalLoans}</td>
+        <td style="font-size:0.8rem;text-align:center;color:${activeLoans>0?'#4A7DC0':'var(--muted)'};font-weight:${activeLoans>0?700:400}">${activeLoans}</td>
+        <td>${statusBadge(m.status)}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`);
+}
+
+// ── DOWNLOAD EXCEL ─────────────────────────────────────────────────────────
+// Passes ?signatory= so the API can embed the name in the signature block.
+function downloadReport(type) {
+  if (!type) { toast('Please select a report first.', 'warn'); return; }
+  const signatory = (document.getElementById('signatory-input')?.value || '').trim();
+  const url = `${API}/reports/${type}${signatory ? '?signatory=' + encodeURIComponent(signatory) : ''}`;
+  window.open(url, '_blank');
+  toast(`Downloading ${type} report as Excel…`, 'success');
+}
+</script>
+</body>
+</html>
